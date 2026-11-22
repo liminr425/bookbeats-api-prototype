@@ -58,3 +58,9 @@ def update_playlist(playlist_id: str, payload: PlaylistInput, user: dict = Depen
     data = payload.model_dump()
     _check_title_free(existing["ownerId"], data["title"], exclude_id=playlist_id)
     return ok("Playlist updated successfully.", store.replace(playlist_id, data))
+
+@router.delete("/{playlist_id}")
+def delete_playlist(playlist_id: str, user: dict = Depends(current_user)):
+    _find_accessible(playlist_id, user)
+    store.delete(playlist_id)
+    return ok("Playlist deleted successfully.", None)
