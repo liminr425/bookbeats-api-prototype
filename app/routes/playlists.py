@@ -10,7 +10,6 @@ from ..schemas import Mood, PlaylistInput
 
 router = APIRouter(prefix="/api/v1/playlists", tags=["playlists"])
 
-
 def _find_accessible(playlist_id: str, user: dict) -> dict:
     """Return the playlist, or 404 if it doesn't exist OR belongs to someone else.
 
@@ -52,3 +51,10 @@ def create_playlist(payload: PlaylistInput, user: dict = Depends(current_user)):
     data = payload.model_dump()
     _check_title_free(user["id"], data["title"])
     return ok("Playlist created successfully.", store.create(user["id"], data))
+
+@router.put("/{playlist_id}")
+def update_playlist(playlist_id: str, payload: PlaylistInput, user: dict = Depends(current_user)):
+    existing = _find_accessible(playlist_id, user)
+    data = payload.model_dump()
+    _check_title_free(existing["ownerId"], data["title"], exclude_id=playlist_id)
+    return ok("Playlist updated successfully.", store.replace(playlist_id, data))
