@@ -16,6 +16,22 @@ def error_body(code, message, details=None):
         err["details"] = details
     return {"success": False, "error": err}
 
+def _field_name(loc):
+    """('body', 'songs', 0, 'title') -> 'songs[0].title'"""
+    name = ""
+    for part in loc[1:]:
+        name += f"[{part}]" if isinstance(part, int) else ("." if name else "") + str(part)
+    return name or "body"
+
+
+def _message(err):
+    if err["type"] == "missing":
+        return "Field is required."
+    if err["type"] == "extra_forbidden":
+        return "Unknown field."
+    return err["msg"].removeprefix("Value error, ")
+
+
 def register_handlers(app):
     @app.exception_handler(ApiError)
     async def api_error(request: Request, exc: ApiError):
@@ -23,10 +39,11 @@ def register_handlers(app):
 
     @app.exception_handler(RequestValidationError)
     async def validation_error(request: Request, exc: RequestValidationError):
-        details = [
-            {"field": ".".join(str(p) for p in e["loc"] if p != "body"), "message": e["msg"]}
-            for e in exc.errors()
-        ]
+        errors = exc.errors()
+        if any(e["type"] == "json_invalid" for e in errors):
+            details = [{"field": "body", "message": "Request body must be valid JSON."}]
+        else:
+            details = [{"field": _field_name(e["loc"]), "message": _message(e)} for e in errors]
         return JSONResponse(
             status_code=400,
             content=error_body("VALIDATION_ERROR", "The request contains invalid or missing fields.", details),
