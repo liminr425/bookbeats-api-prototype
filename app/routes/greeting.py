@@ -1,10 +1,12 @@
-"""Public endpoint: the HTML greeting page."""
+"""Public endpoint: the HTML greeting page and health check."""
 from html import escape
 
 from fastapi import APIRouter
 from fastapi.responses import HTMLResponse
 
 from .. import project_info as info
+from ..errors import ok
+
 
 router = APIRouter(prefix="/api/v1", tags=["system"])
 
@@ -69,3 +71,8 @@ def _render() -> str:
 @router.get("/greeting", response_class=HTMLResponse)
 def greeting():
     return HTMLResponse(_render(), media_type="text/html; charset=utf-8")
+
+
+@router.get("/health")
+def health():
+    return ok("BookBeats API is running.", {"status": "ok", "version": info.API_VERSION})
