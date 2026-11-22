@@ -6,10 +6,9 @@ from fastapi import APIRouter, Depends, Query
 from .. import data as store
 from ..auth import current_user
 from ..errors import ApiError, ok
-from ..schemas import Mood
+from ..schemas import Mood, PlaylistInput
 
 router = APIRouter(prefix="/api/v1/playlists", tags=["playlists"])
-
 
 def _find_accessible(playlist_id: str, user: dict) -> dict:
     """Return the playlist, or 404 if it doesn't exist OR belongs to someone else.
@@ -22,6 +21,9 @@ def _find_accessible(playlist_id: str, user: dict) -> dict:
         raise ApiError(404, "NOT_FOUND", "Playlist not found.")
     return playlist
 
+def _check_title_free(owner_id: str, title: str, exclude_id: Optional[str] = None) -> None:
+    if store.title_taken(owner_id, title, exclude_id):
+        raise ApiError(409, "CONFLICT", f"A playlist titled '{title}' already exists for this user.")
 
 @router.get("")
 def list_playlists(
@@ -39,6 +41,26 @@ def list_playlists(
     start = (page - 1) * perPage
     return ok("Playlists retrieved successfully.", items[start:start + perPage],
               {"total": len(items), "page": page, "perPage": perPage})
+
 @router.get("/{playlist_id}")
 def get_playlist(playlist_id: str, user: dict = Depends(current_user)):
     return ok("Playlist retrieved successfully.", _find_accessible(playlist_id, user))
+
+@router.post("", status_code=201)
+def create_playlist(payload: PlaylistInput, user: dict = Depends(current_user)):
+    data = payload.model_dump()
+    _check_title_free(user["id"], data["title"])
+    return ok("Playlist created successfully.", store.create(user["id"], data))
+
+@router.put("/{playlist_id}")
+def update_playlist(playlist_id: str, payload: PlaylistInput, user: dict = Depends(current_user)):
+    existing = _find_accessible(playlist_id, user)
+    data = payload.model_dump()
+    _check_title_free(existing["ownerId"], data["title"], exclude_id=playlist_id)
+    return ok("Playlist updated successfully.", store.replace(playlist_id, data))
+
+@router.delete("/{playlist_id}")
+def delete_playlist(playlist_id: str, user: dict = Depends(current_user)):
+    _find_accessible(playlist_id, user)
+    store.delete(playlist_id)
+    return ok("Playlist deleted successfully.", None)
