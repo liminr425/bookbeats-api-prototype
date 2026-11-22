@@ -56,6 +56,7 @@ def register_handlers(app):
         return JSONResponse(
             status_code=exc.status_code,
             content=error_body(codes.get(exc.status_code, "ERROR"), msgs.get(exc.status_code, "Request failed.")),
+            headers=getattr(exc, "headers", None),
         )
 
     @app.exception_handler(Exception)
