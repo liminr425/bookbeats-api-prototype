@@ -42,3 +42,40 @@ def reset() -> None:
     _ids = itertools.count(106)
 
 reset()
+
+def _now() -> str:
+    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+def list_all(owner_id: Optional[str] = None, mood: Optional[str] = None, q: Optional[str] = None) -> list:
+    items = list(_playlists.values())
+    if owner_id:
+        items = [p for p in items if p["ownerId"] == owner_id]
+    if mood:
+        items = [p for p in items if p["mood"] == mood]
+    if q:
+        needle = q.lower()
+        items = [p for p in items if needle in p["title"].lower() or needle in p["bookTitle"].lower()]
+    return deepcopy(items)
+
+def get(playlist_id: str) -> Optional[dict]:
+    p = _playlists.get(playlist_id)
+    return deepcopy(p) if p else None
+
+def title_taken(owner_id: str, title: str, exclude_id: Optional[str] = None) -> bool:
+    return any(p["ownerId"] == owner_id and p["title"].lower() == title.lower() and p["id"] != exclude_id
+               for p in _playlists.values())
+
+def create(owner_id: str, data: dict) -> dict:
+    pid = f"pl_{next(_ids)}"
+    now = _now()
+    _playlists[pid] = {"id": pid, **data, "ownerId": owner_id, "createdAt": now, "updatedAt": now}
+    return deepcopy(_playlists[pid])
+
+def replace(playlist_id: str, data: dict) -> dict:
+    current = _playlists[playlist_id]
+    _playlists[playlist_id] = {"id": playlist_id, **data, "ownerId": current["ownerId"],
+                               "createdAt": current["createdAt"], "updatedAt": _now()}
+    return deepcopy(_playlists[playlist_id])
+
+def delete(playlist_id: str) -> None:
+    del _playlists[playlist_id]
