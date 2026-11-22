@@ -19,7 +19,10 @@ def _seed() -> dict:
           _song("La Vie en Rose", "Édith Piaf")]),
         ("pl_4", "user-b", "Arrakis Soundtrack", "Dune", "Frank Herbert", "mysterious", 70,
          [_song("Time", "Hans Zimmer"), _song("Tubular Bells", "Mike Oldfield"),
-          _song("Shine On You Crazy Diamond", "Pink Floyd")])
+          _song("Shine On You Crazy Diamond", "Pink Floyd")]),
+          ("pl_105", "admin", "Admin Pick: The Hobbit", "The Hobbit", "J. R. R. Tolkien", "uplifting", 60,
+         [_song("Here Comes the Sun", "The Beatles"), _song("Rivers and Roads", "The Head and the Heart"),
+          _song("Home", "Edward Sharpe & The Magnetic Zeros")]),
     ]
 
     data = {}
