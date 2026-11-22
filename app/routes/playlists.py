@@ -30,9 +30,15 @@ def list_playlists(
     perPage: int = Query(10, ge=1, le=50),
     mood: Optional[Mood] = Query(None),
     q: Optional[str] = Query(None, min_length=1, max_length=100),
+    ownerId: Optional[str] = Query(None, min_length=1, max_length=50),
 ):
-    owner_filter = None if user["role"] == "admin" else user["id"]
+    if ownerId is not None and user["role"] != "admin":
+        raise ApiError(403, "FORBIDDEN", "Only administrators can filter playlists by owner.")
+    owner_filter = ownerId if user["role"] == "admin" else user["id"]
     items = store.list_all(owner_id=owner_filter, mood=mood, q=q)
     start = (page - 1) * perPage
     return ok("Playlists retrieved successfully.", items[start:start + perPage],
               {"total": len(items), "page": page, "perPage": perPage})
+@router.get("/{playlist_id}")
+def get_playlist(playlist_id: str, user: dict = Depends(current_user)):
+    return ok("Playlist retrieved successfully.", _find_accessible(playlist_id, user))
