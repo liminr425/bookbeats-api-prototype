@@ -1,10 +1,18 @@
+<<<<<<< HEAD
 # BookBeats API
+=======
+# BookBeats API (Assignment 2 prototype)
+>>>>>>> b2aff62f7049a8b0f8c4c8374c91986640a4bd85
 
 BookBeats turns any book into a custom soundtrack. This repository is the first backend prototype:
 a REST API built with **Python + FastAPI**, using **mocked in-memory data** instead of PostgreSQL.
 The main resource is `playlists` (saved playlists).
 
+<<<<<<< HEAD
 Team **DoubleL**: Leyla Khanaliyeva and Liaman Shakhbazova
+=======
+Team **DoubleL**: Leyla Khanaliyeva and Liaman Shakhbazova.
+>>>>>>> b2aff62f7049a8b0f8c4c8374c91986640a4bd85
 ADA University, CSCI 3509: Intro to Software Engineering, CRN 10938
 
 ## Install and run
@@ -66,6 +74,7 @@ app/
 tests/              automated tests for every status code
 examples/requests.http
 ```
+<<<<<<< HEAD
 
 ## Team and Git history
 
@@ -86,3 +95,5 @@ Who worked on what:
 - **Leyla Khanaliyeva:** mock data (playlists for user A, user B and the admin), the playlist validation schema, the create, update and delete endpoints (including 409 on duplicate titles), ownership, validation and CRUD tests, `API.md` and this README.
 
 Workflow: the first commits (project skeleton, error handlers, mock data) were made directly on `main`. From the playlist endpoints onward, every change went through a feature branch and a pull request, which the other teammate could review.
+=======
+>>>>>>> b2aff62f7049a8b0f8c4c8374c91986640a4bd85
