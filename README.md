@@ -73,10 +73,8 @@ Team members, student IDs and responsibilities are listed in [CONTRIBUTORS.md](C
 Output of `git shortlog -sn --all`:
 
 ```
-16  leylakhanaliyeva
-14  Liaman Shakhbazova
- 6  lshakhbazova21425
- 3  Leyla Khanaliyeva
+    35  Liaman Shakhbazova
+    22  Leyla Khanaliyeva
 ```
 
 Who worked on what:
