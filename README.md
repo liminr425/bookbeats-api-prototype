@@ -65,7 +65,6 @@ app/
 tests/              automated tests for every status code
 examples/requests.http
 ```
-<<<<<<< HEAD
 
 ## Team and Git history
 
