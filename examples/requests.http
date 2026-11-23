@@ -1,0 +1,99 @@
+### Works with the VS Code "REST Client" extension or PyCharm's HTTP client. Start the server first:
+### uvicorn app.main:app --reload
+@base = http://127.0.0.1:8000/api/v1
+
+### Greeting page (HTML, public)
+GET {{base}}/greeting
+
+### Health check (public)
+GET {{base}}/health
+
+### --- Success: CRUD as User A ---
+GET {{base}}/playlists
+Authorization: Bearer user-a-token
+
+###
+GET {{base}}/playlists/pl_101
+Authorization: Bearer user-a-token
+
+###
+POST {{base}}/playlists
+Authorization: Bearer user-a-token
+Content-Type: application/json
+
+{
+  "title": "Dune Focus",
+  "bookTitle": "Dune",
+  "mood": "mysterious",
+  "intensity": 55,
+  "songs": [{ "title": "Time", "artist": "Hans Zimmer" }]
+}
+
+###
+PUT {{base}}/playlists/pl_101
+Authorization: Bearer user-a-token
+Content-Type: application/json
+
+{
+  "title": "Gone Girl Nights (calmer)",
+  "bookTitle": "Gone Girl",
+  "mood": "dark",
+  "intensity": 30,
+  "songs": [{ "title": "Heathens", "artist": "Twenty One Pilots" }]
+}
+
+###
+DELETE {{base}}/playlists/pl_102
+Authorization: Bearer user-a-token
+
+### --- Admin sees everything ---
+GET {{base}}/playlists
+Authorization: Bearer admin-token
+
+###
+GET {{base}}/playlists?ownerId=user-b
+Authorization: Bearer admin-token
+
+### --- 401: no token ---
+GET {{base}}/playlists
+
+### --- 401: invalid token ---
+GET {{base}}/playlists
+Authorization: Bearer wrong-token
+
+### --- 404: User A tries User B's playlist ---
+GET {{base}}/playlists/pl_103
+Authorization: Bearer user-a-token
+
+### --- 404: id does not exist ---
+GET {{base}}/playlists/pl_999
+Authorization: Bearer user-a-token
+
+### --- 403: regular user uses admin-only filter ---
+GET {{base}}/playlists?ownerId=user-b
+Authorization: Bearer user-a-token
+
+### --- 400: validation errors (title too short, unknown mood, empty songs, unknown field) ---
+POST {{base}}/playlists
+Authorization: Bearer user-a-token
+Content-Type: application/json
+
+{ "title": "ab", "mood": "angry", "songs": [], "foo": 1 }
+
+### --- 400: wrong field type (intensity must be a number) ---
+POST {{base}}/playlists
+Authorization: Bearer user-a-token
+Content-Type: application/json
+
+{ "title": "Typed Wrong", "bookTitle": "Dune", "mood": "calm", "intensity": "high", "songs": [{ "title": "Time", "artist": "Hans Zimmer" }] }
+
+### --- 405: unsupported method ---
+PATCH {{base}}/playlists/pl_101
+Authorization: Bearer user-a-token
+
+### --- 409: title already exists for this user (User A already owns "Gatsby Summer") ---
+POST {{base}}/playlists
+Authorization: Bearer user-a-token
+Content-Type: application/json
+
+{ "title": "Gatsby Summer", "bookTitle": "The Great Gatsby", "mood": "nostalgic", "songs": [{ "title": "Dreams", "artist": "Fleetwood Mac" }] }
